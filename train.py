@@ -95,6 +95,9 @@ for i in range(int(len(losses)/len(data_loader))):
         tmp.append(losses[int(j+i*len(losses)/len(data_loader))])
     epoch_mean_losses.append(np.mean(tmp))
 
+if not os.path.isdir(args.figdir):
+    os.mkdir(args.figdir)
+
 plt.plot(epoch_mean_losses)
 plt.xlabel('Epoch')
 plt.ylabel('MSE Loss')
