@@ -26,7 +26,7 @@ args=parser.parse_args()
 
 #todo -- implement changing hyper params -- Sections to support indicated by a comment of #1#
 
-trainX, trainy=load_data_from_df(args.train,one_hot_formal_charge=True)
+trainX, trainy=load_data_from_df('../'+args.train,one_hot_formal_charge=True)
 batch_size=8
 data_loader=construct_loader(trainX,testy,batch_size)
 
