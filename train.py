@@ -30,7 +30,7 @@ args=parser.parse_args()
 
 trainX, trainy=load_data_from_df('../'+args.train,one_hot_formal_charge=True)
 batch_size=8
-data_loader=construct_loader(trainX,testy,batch_size)
+data_loader=construct_loader(trainX,trainy,batch_size)
 
 d_atom = trainX[0][0].shape[1]
 
