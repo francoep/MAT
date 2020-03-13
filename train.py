@@ -9,7 +9,7 @@ import torch
 import numpy as np
 #from rdkit.Chem import AllChem as Chem
 os.chdir('src')
-
+print(os.getcwd())
 import argparse
 import matplotlib.pyplot as plt
 from featurization.data_utils import load_data_from_df, construct_loader
