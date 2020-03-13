@@ -7,7 +7,7 @@ import pandas as pd
 import torch
 #from tqdm import tqdm
 import numpy as np
-from rdkit.Chem import AllChem as Chem
+#from rdkit.Chem import AllChem as Chem
 os.chdir('src')
 
 import argparse
