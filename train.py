@@ -22,7 +22,7 @@ parser.add_argument('--train',type=str,required=True,help='Train data filename. 
 parser.add_argument('--test',type=str,required=True,help='Test data filename. Assumed to be a csv: smile,y')
 parser.add_argument('--pretrain',action='store_true',help='Flag to use the pretrained weights. If set, will use. Assumed to be pretrained_weights.pt')
 parser.add_argument('--figdir',type=str,required=True,help='Absolutepath to the directory for the figures')
-parser.add_argument('--savemodel',type=bool, action='store_true',help='Flag to save the trained model. The filename will be Traindata.model')
+parser.add_argument('--savemodel', action='store_true',help='Flag to save the trained model. The filename will be Traindata.model')
 
 args=parser.parse_args()
 
