@@ -114,7 +114,7 @@ plt.title('Training Loss -- last 100 epochs')
 plt.savefig(args.figdir+'/training_losses_split'+args.test.split('_test')[1][0]+'.png')
 
 #after the plots were made -- we need to evaluate the test_set
-testX, testy=load_data_from_df(args.train,one_hot_formal_charge=True)
+testX, testy=load_data_from_df('../'+args.test,one_hot_formal_charge=True)
 testdata_loader=construct_loader(testX,testy,batch_size)
 
 gold=np.array([])
