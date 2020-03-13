@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 from featurization.data_utils import load_data_from_df, construct_loader
 from transformer import make_model
 
-parser=argparse.ArgumentParser(desctiption='Train and test MAT model on datasets')
+parser=argparse.ArgumentParser(description='Train and test MAT model on datasets')
 parser.add_argument('--train',type=str,required=True,help='Train data filename. Assumed to be a csv: smile,y')
 parser.add_argument('--test',type=str,required=True,help='Test data filename. Assumed to be a csv: smile,y')
 parser.add_argument('--pretrain',action='store_true',help='Flag to use the pretrained weights. If set, will use. Assumed to be pretrained_weights.pt')
