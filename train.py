@@ -3,6 +3,7 @@
 #TODO: clean the script from changing into the src directory and having everything being mapped from there.
 
 import os
+import sys
 import pandas as pd
 import torch
 #from tqdm import tqdm
@@ -10,6 +11,7 @@ import numpy as np
 #from rdkit.Chem import AllChem as Chem
 os.chdir('src')
 print(os.getcwd())
+sys.path.append(os.getcwd())
 import argparse
 import matplotlib.pyplot as plt
 from featurization.data_utils import load_data_from_df, construct_loader
