@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+#TODO: clean the script from changing into the src directory and having everything being mapped from there.
 
 import os
 import pandas as pd
@@ -15,10 +16,11 @@ from featurization.data_utils import load_data_from_df, construct_loader
 from transformer import make_model
 
 parser=argparse.ArgumentParser(desctiption='Train and test MAT model on datasets')
-parser.add_argument('--train',type=str,help='Train data filename. Assumed to be a csv: smile,y')
-parser.add_argument('--test',type=str,help='Test data filename. Assumed to be a csv: smile,y')
+parser.add_argument('--train',type=str,required=True,help='Train data filename. Assumed to be a csv: smile,y')
+parser.add_argument('--test',type=str,required=True,help='Test data filename. Assumed to be a csv: smile,y')
 parser.add_argument('--pretrain',action='store_true',help='Flag to use the pretrained weights. If set, will use. Assumed to be pretrained_weights.pt')
-parser.add_argument('--figdir',type=str,help='Absolutepath to the directory for the figures')
+parser.add_argument('--figdir',type=str,required=True,help='Absolutepath to the directory for the figures')
+parser.add_argument('--savemodel',type=bool, action='store_true',help='Flag to save the trained model. The filename will be Traindata.model')
 
 args=parser.parse_args()
 
@@ -85,7 +87,8 @@ for epoch in range(500):
         optimizer.step()
 
 #saving the trained model
-torch.save(model.state_dict(),args.train.replace('.csv','.model'))
+if args.savemodel:
+    torch.save(model.state_dict(),args.train.replace('.csv','.model'))
 
 #now that the training is complete -- we need to output the training figures
 epoch_mean_losses=[]
