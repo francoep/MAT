@@ -142,7 +142,7 @@ if not os.path.isdir(args.datadir):
 
 #saving the training loss -- <train>_<loss>_<optim>_<optimHP>_<epochs>_<train|test|testmetrics>.pi
 #TODO -- adding the hyper parameters for the optimizer
-with open(args.datadir+'/'+trainname_for_output+args.optimizer+'_'+str(args.epochs)+'_trainloss.pi') as outfile:
+with open(args.datadir+'/'+trainname_for_output+args.optimizer+'_'+str(args.epochs)+'_trainloss.pi','wb') as outfile:
     pickle.dump(epoch_mean_losses,outfile)
 
 #we need to evaluate the test_set
@@ -160,12 +160,12 @@ for batch in testdata_loader:
     y_pred = model(node_features, batch_mask, adjacency_matrix, distance_matrix, None)
     preds=np.append(preds,y_pred.tolist())
 
-with open(args.datadir+'/'+trainname_for_output+args.optim+'_'+str(args.epochs)+'_test.pi') as outfile:
+with open(args.datadir+'/'+trainname_for_output+args.optim+'_'+str(args.epochs)+'_test.pi','wb') as outfile:
     pickle.dump((gold,preds),outfile)
 
 r2=np.corrcoef(preds,gold)[0][1]**2
 rmse=np.sqrt(np.mean(preds-gold)**2)
 
-with open(args.datadir+'/'+trainname_for_output+args.optim+'_'+str(args.epochs)+'_testmetrics.txt') as outfile:
+with open(args.datadir+'/'+trainname_for_output+args.optim+'_'+str(args.epochs)+'_testmetrics.txt','w') as outfile:
     outfile.write(f'R2: {r2}\n')
     outfile.write(f'RMSE: {rmse}\n')
