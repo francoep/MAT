@@ -124,7 +124,7 @@ for epoch in range(args.epochs):
 
 #saving the trained model
 if args.savemodel:
-    torch.save(model.state_dict(),args.train.replace('.csv','_trained.model'))
+    torch.save(model.state_dict(),args.train.split('/')[-1].replace('.csv','_trained.model'))
 
 #now that the training is complete -- we need to output the training losses
 epoch_mean_losses=[]
