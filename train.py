@@ -41,7 +41,7 @@ parser.add_argument('-p','--prefix',type=str,required=True,help='Prefix for the 
 parser.add_argument('--lr',type=float,default=1e-4, help='Learning rate for the Optimizer. Defaults to 1e-4.')
 parser.add_argument('--momentum',type=float,default=0.9,help='Momentum for SGD optimizer. Defaults to 0.9')
 parser.add_argument('--weight_decay',type=float,default=0,help='L2 pentalty for Optimizer. Defaults to 0')
-parser.add_argument('--dampening',type=float,default=0,help='Dampening for momemtum in SGD Optimizer. Defaults to 0')
+parser.add_argument('--dampening',type=float,default=0,help='Dampening for momentum in SGD Optimizer. Defaults to 0')
 parser.add_argument('--nesterov',action='store_true',default=False,help='Enable Nesterov momentum for SGD.')
 parser.add_argument('--beta1',type=float,default=0.9,help='Beta1 for ADAM optimizer. Defaults to 0.9')
 parser.add_argument('--beta2',type=float,default=0.999,help='Beta2 for ADAM optimizer. Defaults to 0.999')
@@ -106,7 +106,7 @@ elif args.loss=='logcosh':
 
 #Selecting Optimizer
 if args.optimizer=='sgd':
-    optimizer=torch.optim.SGD(model.parameters(),lr=args.lr,momentum=args.momemtum,weight_decay=args.weight_decay,dampening=args.dampening,nesterov=args.nesterov)
+    optimizer=torch.optim.SGD(model.parameters(),lr=args.lr,momentum=args.momentum,weight_decay=args.weight_decay,dampening=args.dampening,nesterov=args.nesterov)
 elif args.optimizer=='adam':
     optimizer=torch.optim.Adam(model.parameters(),lr=args.lr,betas=(args.beta1,args.beta2),eps=args.epsilon,weight_decay=args.weight_decay,amsgrad=args.amsgrad)#default adam has lr=0.001
 
