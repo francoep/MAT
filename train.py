@@ -11,9 +11,10 @@ import numpy as np
 #from rdkit.Chem import AllChem as Chem
 
 #TODO -- change this behavior
-os.chdir('src')
+#os.chdir('src')
 print(os.getcwd())
 sys.path.append(os.getcwd())
+sys.path.append('src')
 import argparse
 #import matplotlib.pyplot as plt  removing the plotting behavior -- instead just saving out the data
 from featurization.data_utils import load_data_from_df, construct_loader
@@ -126,7 +127,7 @@ for epoch in range(args.epochs):
 
 #saving the trained model
 if args.savemodel:
-    torch.save(model.state_dict(),trainname_for_output+'trained.model')
+    torch.save(model.state_dict(),trainname_for_output+args.optimizer+'_trained.model')
 
 #now that the training is complete -- we need to output the training losses
 epoch_mean_losses=[]
