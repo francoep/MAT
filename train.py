@@ -51,7 +51,7 @@ trainname_for_output=args.train.split('/')[-1].replace('.csv','_')
 
 #todo -- implement changing hyper params -- Sections to support indicated by a comment of #1#
 
-trainX, trainy=load_data_from_df('../'+args.train,one_hot_formal_charge=True)
+trainX, trainy=load_data_from_df(args.train,one_hot_formal_charge=True)
 batch_size=8
 data_loader=construct_loader(trainX,trainy,batch_size)
 
@@ -76,7 +76,7 @@ model_params= {
 model=make_model(**model_params)
 
 if args.pretrain:
-    pretrained_name = '../pretrained_weights.pt'  # This file should be downloaded first (See README.md).
+    pretrained_name = 'pretrained_weights.pt'  # This file should be downloaded first (See README.md).
     pretrained_state_dict = torch.load(pretrained_name)
     model_state_dict = model.state_dict()
     for name, param in pretrained_state_dict.items():
@@ -148,7 +148,7 @@ with open(args.datadir+'/'+trainname_for_output+args.optimizer+'_'+str(args.epoc
     pickle.dump(epoch_mean_losses,outfile)
 
 #we need to evaluate the test_set
-testX, testy=load_data_from_df('../'+args.test,one_hot_formal_charge=True)
+testX, testy=load_data_from_df(args.test,one_hot_formal_charge=True)
 testdata_loader=construct_loader(testX,testy,batch_size)
 
 gold=np.array([])
