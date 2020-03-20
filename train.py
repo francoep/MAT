@@ -42,8 +42,10 @@ parser.add_argument('-o','--optimizer',type=str,default='sgd',help='Optimizer fo
 
 args=parser.parse_args()
 
-#TODO -- implement 'qualtile' loss funtion
+#TODO -- implement 'quantile' loss funtion
 assert args.loss in set(['mse','mae','huber','logcosh']) and args.optimizer in set(['sgd','adam'])
+
+trainname_for_output=args.train.split('/')[-1].replace('.csv','_')
 
 #todo -- implement changing hyper params -- Sections to support indicated by a comment of #1#
 
@@ -96,7 +98,7 @@ elif args.loss=='logcosh':
     criterion=None
 
 
-#TODO -- extra optimizers -- SGD (lr, momemtum,weight_decay), ADAM(lr, beta1, beta2, eps, weight_decay)
+#TODO -- extra optimizers -- SGD (lr, momemtum,weight_decay), ADAM(lr, beta1, beta2, eps, weight_decay)  & implement their hyper-params into running.
 if args.optimizer=='sgd':
     optimizer=torch.optim.SGD(model.parameters(),lr=1e-4,momentum=0.9,weight_decay=0,dampening=0,nesterov=False)
 elif args.optimizer=='adam':
@@ -124,7 +126,7 @@ for epoch in range(args.epochs):
 
 #saving the trained model
 if args.savemodel:
-    torch.save(model.state_dict(),args.train.split('/')[-1].replace('.csv','_trained.model'))
+    torch.save(model.state_dict(),trainname_for_output+'trained.model')
 
 #now that the training is complete -- we need to output the training losses
 epoch_mean_losses=[]
@@ -140,7 +142,7 @@ if not os.path.isdir(args.datadir):
 
 #saving the training loss -- <train>_<loss>_<optim>_<optimHP>_<epochs>_<train|test|testmetrics>.pi
 #TODO -- adding the hyper parameters for the optimizer
-with open(args.datadir+'/'+args.train.replace('.csv','_')+args.optim+'_'+str(args.epochs)+'_trainloss.pi') as outfile:
+with open(args.datadir+'/'+trainname_for_output+args.optimizer+'_'+str(args.epochs)+'_trainloss.pi') as outfile:
     pickle.dump(epoch_mean_losses,outfile)
 
 #we need to evaluate the test_set
@@ -158,12 +160,12 @@ for batch in testdata_loader:
     y_pred = model(node_features, batch_mask, adjacency_matrix, distance_matrix, None)
     preds=np.append(preds,y_pred.tolist())
 
-with open(args.datadir+'/'+args.train.replace('.csv','_')+args.optim+'_'+str(args.epochs)+'_test.pi') as outfile:
+with open(args.datadir+'/'+trainname_for_output+args.optim+'_'+str(args.epochs)+'_test.pi') as outfile:
     pickle.dump((gold,preds),outfile)
 
 r2=np.corrcoef(preds,gold)[0][1]**2
 rmse=np.sqrt(np.mean(preds-gold)**2)
 
-with open(args.datadir+'/'+args.train.replace('.csv','_')+args.optim+'_'+str(args.epochs)+'_testmetrics.txt') as outfile:
+with open(args.datadir+'/'+trainname_for_output+args.optim+'_'+str(args.epochs)+'_testmetrics.txt') as outfile:
     outfile.write(f'R2: {r2}\n')
     outfile.write(f'RMSE: {rmse}\n')
