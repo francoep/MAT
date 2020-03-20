@@ -139,7 +139,7 @@ epoch_mean_losses=[]
 for i in range(int(len(losses)/len(data_loader))):
     tmp=[]
     for j in range(int(len(data_loader))):
-        tmp.append(losses[int(j+i*len(losses))])
+        tmp.append(losses[int(j+i*len(losses)/len(data_loader))])
     epoch_mean_losses.append(np.mean(tmp))
 
 #making the directory for the data
