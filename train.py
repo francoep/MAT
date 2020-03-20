@@ -166,6 +166,6 @@ with open(args.datadir+'/'+trainname_for_output+args.optimizer+'_'+str(args.epoc
 r2=np.corrcoef(preds,gold)[0][1]**2
 rmse=np.sqrt(np.mean(preds-gold)**2)
 
-with open(args.datadir+'/'+trainname_for_output+args.optimimzer+'_'+str(args.epochs)+'_testmetrics.txt','w') as outfile:
+with open(args.datadir+'/'+trainname_for_output+args.optimizer+'_'+str(args.epochs)+'_testmetrics.txt','w') as outfile:
     outfile.write(f'R2: {r2}\n')
     outfile.write(f'RMSE: {rmse}\n')
