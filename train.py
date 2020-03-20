@@ -15,6 +15,7 @@ import numpy as np
 print(os.getcwd())
 sys.path.append(os.getcwd())
 sys.path.append('src')
+print(sys.path)
 import argparse
 #import matplotlib.pyplot as plt  removing the plotting behavior -- instead just saving out the data
 from featurization.data_utils import load_data_from_df, construct_loader
