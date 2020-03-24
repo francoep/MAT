@@ -24,7 +24,7 @@ IntTensor = torch.cuda.IntTensor if use_cuda else torch.IntTensor
 DoubleTensor = torch.cuda.DoubleTensor if use_cuda else torch.DoubleTensor
 
 
-def load_data_from_df(dataset_path, add_dummy_node=True, one_hot_formal_charge=False, use_data_saving=True):
+def load_data_from_df(dataset_path, add_dummy_node=True, one_hot_formal_charge=False, use_data_saving=True,two_d_only=False):
     """Load and featurize data stored in a CSV file.
 
     Args:
@@ -56,7 +56,7 @@ def load_data_from_df(dataset_path, add_dummy_node=True, one_hot_formal_charge=F
         data_y = data_y.astype(np.float32)
 
     x_all, y_all = load_data_from_smiles(data_x, data_y, add_dummy_node=add_dummy_node,
-                                         one_hot_formal_charge=one_hot_formal_charge)
+                                         one_hot_formal_charge=one_hot_formal_charge,two_d_only=two_d_only)
     if use_data_saving and not os.path.exists(feature_path):
         logging.info(f"Saving features at '{feature_path}'")
         pickle.dump((x_all, y_all), open(feature_path, "wb"))
@@ -64,7 +64,7 @@ def load_data_from_df(dataset_path, add_dummy_node=True, one_hot_formal_charge=F
     return x_all, y_all
 
 
-def load_data_from_smiles(x_smiles, labels, add_dummy_node=True, one_hot_formal_charge=False):
+def load_data_from_smiles(x_smiles, labels, add_dummy_node=True, one_hot_formal_charge=False,two_d_only=False):
     """Load and featurize data from lists of SMILES strings and labels.
 
     Args:
@@ -72,6 +72,7 @@ def load_data_from_smiles(x_smiles, labels, add_dummy_node=True, one_hot_formal_
         labels (list[float]): A list of the corresponding labels.
         add_dummy_node (bool): If True, a dummy node will be added to the molecular graph. Defaults to True.
         one_hot_formal_charge (bool): If True, formal charges on atoms are one-hot encoded. Defaults to False.
+        two_d_only (bool): If True, only use rdkit's 2D embedding for the molecule
 
     Returns:
         A tuple (X, y) in which X is a list of graph descriptors (node features, adjacency matrices, distance matrices),
@@ -82,13 +83,16 @@ def load_data_from_smiles(x_smiles, labels, add_dummy_node=True, one_hot_formal_
     for smiles, label in zip(x_smiles, labels):
         try:
             mol = MolFromSmiles(smiles)
-            try:
-                mol = Chem.AddHs(mol)
-                AllChem.EmbedMolecule(mol, maxAttempts=5000)
-                AllChem.UFFOptimizeMolecule(mol)
-                mol = Chem.RemoveHs(mol)
-            except:
+            if two_d_only:
                 AllChem.Compute2DCoords(mol)
+            else:
+                try:
+                    mol = Chem.AddHs(mol)
+                    AllChem.EmbedMolecule(mol, maxAttempts=5000)
+                    AllChem.UFFOptimizeMolecule(mol)
+                    mol = Chem.RemoveHs(mol)
+                except:
+                    AllChem.Compute2DCoords(mol)
 
             afm, adj, dist = featurize_mol(mol, add_dummy_node, one_hot_formal_charge)
             x_all.append([afm, adj, dist])
