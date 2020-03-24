@@ -33,7 +33,8 @@ parser.add_argument('--train',type=str,required=True,help='Train data filename. 
 parser.add_argument('--test',type=str,required=True,help='Test data filename. Assumed to be a csv: smile,y')
 parser.add_argument('--pretrain',action='store_true',help='Flag to use the pretrained weights. If set, will use. Assumed to be pretrained_weights.pt')
 parser.add_argument('--datadir',type=str,required=True,help='Absolutepath to the directory for the data from training and testing the model. Saved filenames will be <prefix>_<trainlosses|trainepochlosses|testdic>.pi')
-parser.add_argument('--savemodel', action='store_true',help='Flag to save the trained model. The filename will be <prefix>_trained.model')
+parser.add_argument('--savemodel', action='store_true',default=False,help='Flag to save the trained model. The filename will be <prefix>_trained.model')
+parser.add_argument('--only2d',action='store_true',default=False,help='Flag to only use 2D conformers for making the distance matrix.')
 parser.add_argument('-e','--epochs', type=int, default=500,help='Number of epochs to train the model for. Defaults to 500')
 parser.add_argument('-l','--loss',type=str,default='mse',help='Loss Function to use: mse, mae, huber, or logcosh.')
 parser.add_argument('-o','--optimizer',type=str,default='sgd',help='Optimizer for training the model: sgd, or adam.')
@@ -55,7 +56,7 @@ assert args.loss in set(['mse','mae','huber','logcosh']) and args.optimizer in s
 
 #todo -- implement changing hyper params -- Sections to support indicated by a comment of #1#
 
-trainX, trainy=load_data_from_df(args.train,one_hot_formal_charge=True)
+trainX, trainy=load_data_from_df(args.train,one_hot_formal_charge=True,two_d_only=args.only2d)
 batch_size=8
 data_loader=construct_loader(trainX,trainy,batch_size)
 
