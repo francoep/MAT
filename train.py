@@ -89,7 +89,8 @@ else:
 
 trainfile=args.prefix+'_train'+args.fold+'.csv'
 testfile=args.prefix+'_test'+args.fold+'.csv'
-
+print('Trainfile:',trainfile)
+print('Testfile:',testfile)
 #loading the training & testing data
 batch_size=8
 trainX, trainy=load_data_from_df(trainfile,one_hot_formal_charge=True,two_d_only=need2d)
@@ -187,6 +188,7 @@ for epoch in range(args.epochs):
 
         wandb.log({"Train Loss":loss.item()},step=iteration)
 
+    train_rmse, train_r2=(np.sqrt(np.mean(epoch_preds-epoch_gold)**2), np.corrcoef(epoch_preds,epoch_gold)[0][1]**2)
     wandb.log({"Train Epoch RMSE":train_rmse,"Train Epoch R2":train_r2},step=iteration)
 
 
