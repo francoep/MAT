@@ -87,11 +87,14 @@ if '_2d_' in prefix:
 else:
     need2d=False
 
+trainfile=args.prefix+'_train'+args.fold+'.csv'
+testfile=args.prefix+'_test'+args.fold+'.csv'
+
 #loading the training & testing data
 batch_size=8
-trainX, trainy=load_data_from_df(args.train,one_hot_formal_charge=True,two_d_only=need2d)
+trainX, trainy=load_data_from_df(trainfile,one_hot_formal_charge=True,two_d_only=need2d)
 data_loader=construct_loader(trainX,trainy,batch_size)
-testX, testy=load_data_from_df(args.test,one_hot_formal_charge=True,two_d_only=need2d)
+testX, testy=load_data_from_df(testfile,one_hot_formal_charge=True,two_d_only=need2d)
 testdata_loader=construct_loader(testX,testy,batch_size)
 
 
