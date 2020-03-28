@@ -17,7 +17,7 @@ parameters:
     min: 250
     max: 2000
   loss:
-    values: ["mse","mae","huber","logcosh"]
+    values: ["mse","mae","huber"]
   lr:
     min: 0.0001
     max: 0.1
