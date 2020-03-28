@@ -1,4 +1,9 @@
 program: train.py
+command: 
+  - ${env}
+  - python3
+  - ${program}
+  - ${args}
 method: bayes
 metric:
   goal: minimize
