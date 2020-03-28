@@ -74,7 +74,7 @@ args=parser.parse_args()
 outf_prefix=f'{args.prefix}_{args.fold}_e{args.epochs}_{args.loss}_{args.optimizer}_lr{args.lr}_m{args.momentum}_wd{args.weight_decay}'
 
 #wandb things
-wandb.init(project='mat_aqsol',name=outf_prefix)
+wandb.init(project='mat_aqsol',name=outf_prefix.split('/')[-1])
 
 
 
