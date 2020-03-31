@@ -52,7 +52,7 @@ def eval_test(some_model, testdata_loader):
 parser=argparse.ArgumentParser(description='Train and test MAT model on datasets')
 parser.add_argument('--prefix',type=str,required=True,help='Prefix for the train and test data. Assumed to follow <prefix>_train<fold>.csv')
 parser.add_argument('--fold',type=str,required=True,help='Fold for the datafiles.')
-#parser.add_argument('--pretrain',action='store_true',help='Flag to use the pretrained weights. If set, will use. Assumed to be pretrained_weights.pt')
+parser.add_argument('--pretrain',action='store_true',default=False,help='Flag to use the pretrained weights. If set, will use. Assumed to be pretrained_weights.pt')
 parser.add_argument('--datadir',type=str,default='sweep',help='Absolutepath to the directory for the data from training and testing the model (Def: sweep). Saved filenames will be <prefix>_<fold>_e<epochs>_<loss>_<optimizer>_lr<lr>_m<momentum>_wd<weightdecay>_<trainlosses|trainepochlosses|testdic>.pi')
 parser.add_argument('--savemodel', action='store_true',default=False,help='Flag to save the trained model. The filename will be <prefix>_trained.model')
 #parser.add_argument('--only2d',action='store_true',default=False,help='Flag to only use 2D conformers for making the distance matrix.')
@@ -122,7 +122,7 @@ model=make_model(**model_params)
 
 wandb.watch(model,'all')
 
-if True:#args.pretrain:
+if args.pretrain:
     pretrained_name = 'pretrained_weights.pt'  # This file should be downloaded first (See README.md).
     pretrained_state_dict = torch.load(pretrained_name)
     model_state_dict = model.state_dict()
