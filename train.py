@@ -42,7 +42,7 @@ def eval_test(some_model, testdata_loader):
         adjacency_matrix, node_features, distance_matrix, y = batch
         gold=np.append(gold,y.tolist())
         batch_mask = torch.sum(torch.abs(node_features), dim=-1) != 0
-        y_pred = model(node_features, batch_mask, adjacency_matrix, distance_matrix, None)
+        y_pred = some_model(node_features, batch_mask, adjacency_matrix, distance_matrix, None)
         preds=np.append(preds,y_pred.tolist())
 
     return (np.sqrt(np.mean(preds-gold)**2), np.corrcoef(preds,gold)[0][1]**2)
@@ -218,7 +218,6 @@ with open(args.datadir+'/'+outf_prefix+'_trainepochlosses.pi','wb') as outfile:
 gold=np.array([])
 preds=np.array([])
 model.eval()
-
 for batch in testdata_loader:
     adjacency_matrix, node_features, distance_matrix, y = batch
     gold=np.append(gold,y.tolist())
