@@ -91,6 +91,7 @@ trainfile=args.prefix+'_train'+args.fold+'.csv'
 testfile=args.prefix+'_test'+args.fold+'.csv'
 print('Trainfile:',trainfile)
 print('Testfile:',testfile)
+print('Outfile Prefix:',outf_prefix)
 #loading the training & testing data
 batch_size=8
 trainX, trainy=load_data_from_df(trainfile,one_hot_formal_charge=True,two_d_only=need2d)
