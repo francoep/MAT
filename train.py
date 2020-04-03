@@ -73,8 +73,7 @@ args=parser.parse_args()
 
 namep=args.prefix.split('/')[-1]
 outf_prefix=f'{namep}_{args.fold}_e{args.epochs}_{args.loss}_{args.optimizer}_lr{args.lr}_m{args.momentum}_wd{args.weight_decay}'
-print(outf_prefix)
-sys.exit()
+
 #wandb things
 wandb.init(project='MAT',name=outf_prefix)
 
