@@ -71,9 +71,9 @@ parser.add_argument('--epsilon',type=float,default=1e-08,help='Epsilon for ADAM 
 
 args=parser.parse_args()
 
-print(args.prefix)
-print(args.prefix.split('/')[-1])
-#outf_prefix=f'{args.prefix.split('/')[-1]}_{args.fold}_e{args.epochs}_{args.loss}_{args.optimizer}_lr{args.lr}_m{args.momentum}_wd{args.weight_decay}'
+namep=args.prefix.split('/')[-1]
+outf_prefix=f'{namep}_{args.fold}_e{args.epochs}_{args.loss}_{args.optimizer}_lr{args.lr}_m{args.momentum}_wd{args.weight_decay}'
+print(outf_prefix)
 sys.exit()
 #wandb things
 wandb.init(project='MAT',name=outf_prefix)
