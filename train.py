@@ -124,6 +124,7 @@ model=make_model(**model_params)
 wandb.watch(model,'all')
 
 if args.pretrain:
+    print('Using Pretrained Weights')
     pretrained_name = 'pretrained_weights.pt'  # This file should be downloaded first (See README.md).
     pretrained_state_dict = torch.load(pretrained_name)
     model_state_dict = model.state_dict()
