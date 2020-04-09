@@ -1,0 +1,40 @@
+program: train.py
+command: 
+  - ${env}
+  - python3
+  - ${program}
+  - ${args}
+method: grid
+parameters: 
+  prefix:
+    values: ["data/aqsol/aqsol_scaf_2d"]
+  fold:
+    values: ["0"]
+  datadir:
+    values: ['2Darchsweep']
+  epochs:
+    value: 500
+  loss:
+    values: ["huber"]
+  lr:
+    value: 0.04
+  optimizer:
+    values: ["sgd"]
+  momentum:
+    value: 0.6
+  weight_decay:
+    value: 0
+  dropout:
+    values: [0.0, 0.1]
+  ldist:
+    values: [0.33, 0]
+  lattn:
+    values: [0.33, 0.5, 0.25]
+  Ndense:
+    value: 1
+  heads:
+    values: [8, 16, 32]
+  nstacklayers:
+    values: [4, 8, 16]
+  dmodel:
+    values: [512, 1024]
