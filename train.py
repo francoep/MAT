@@ -68,6 +68,7 @@ testfile=args.prefix+'_test'+args.fold+'.csv'
 print('Trainfile:',trainfile)
 print('Testfile:',testfile)
 print('Outfile Prefix:',outf_prefix)
+print('Loading train and test data')
 #loading the training & testing data
 batch_size=8
 trainX, trainy=load_data_from_df(trainfile,one_hot_formal_charge=True,two_d_only=need2d)
@@ -94,6 +95,7 @@ model_params= {
     'aggregation_type': 'mean'
 }
 
+print('Making Model')
 model=make_model(**model_params)
 
 wandb.watch(model,'all')
@@ -133,6 +135,7 @@ elif args.optimizer=='adam':
 
 losses=[]
 
+print('Training')
 #Training loop
 iteration=0
 for epoch in range(args.epochs):
