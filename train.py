@@ -19,36 +19,6 @@ from transformer import make_model
 import pickle
 
 
-
-def logcosh_loss(output,target):
-    '''
-    Log of the cosh of predicted-target tensors.
-    '''
-    loss=torch.sum(torch.log(torch.cosh(output-target)))
-    return loss
-
-
-def eval_test(some_model, testdata_loader):
-    '''
-    Evaluate the model on the test_data_loader
-
-    Returns a tuple of the RMSE & R2 of the predictions
-    '''
-    gold=np.array([])
-    preds=np.array([])
-    some_model.eval()
-
-    for batch in testdata_loader:
-        adjacency_matrix, node_features, distance_matrix, y = batch
-        gold=np.append(gold,y.tolist())
-        batch_mask = torch.sum(torch.abs(node_features), dim=-1) != 0
-        y_pred = some_model(node_features, batch_mask, adjacency_matrix, distance_matrix, None)
-        preds=np.append(preds,y_pred.tolist())
-
-    return (np.sqrt(np.mean(preds-gold)**2), np.corrcoef(preds,gold)[0][1]**2)
-
-
-
 parser=argparse.ArgumentParser(description='Train and test MAT model on datasets')
 parser.add_argument('--prefix',type=str,required=True,help='Prefix for the train and test data. Assumed to follow <prefix>_train<fold>.csv')
 parser.add_argument('--fold',type=str,required=True,help='Fold for the datafiles.')
@@ -67,12 +37,19 @@ parser.add_argument('--dampening',type=float,default=0,help='Dampening for momen
 parser.add_argument('--beta1',type=float,default=0.9,help='Beta1 for ADAM optimizer. Defaults to 0.9')
 parser.add_argument('--beta2',type=float,default=0.999,help='Beta2 for ADAM optimizer. Defaults to 0.999')
 parser.add_argument('--epsilon',type=float,default=1e-08,help='Epsilon for ADAM optimizer. Defaults to 1e-08.')
+parser.add_argument('--dropout',type=float,default=0,help='Applying Dropout to model weights when training')
+parser.add_argument('--ldist',type=float,default=0.33,help='Lambda for model attention to the distance matrix. Defaults to 0.33 (even between dist, attention, and graph features)')
+parser.add_argument('--lattn',type=float,default=0.33,help='Lambda for model attention to the attention matrix. Defaults to 0.33 (even between dist, attenttion, and graph features)')
+parser.add_argument('--Ndense',type=int,default=1,help='Number of Dense blocks in FeedForward section. Defaults to 1')
+parser.add_argument('--heads',type=int,default=16,help='Number of attention heads in MultiHeaded Attention. **Needs to evenly divide dmodel Defaults to 16.')
+parser.add_argument('--dmodel',type=int,default=1024,help='Dimension of the hidden layer for the model. Defaults to 1024.')
+parser.add_argument('--nstacklayers',type=int,default=8,help='Number of stacks in the Encoder layer. Defaults to 8')
 #parser.add_argument('--amsgrad',action='store_true',default=False,help='Enables AMSGrad varient of ADAM.')
 
 args=parser.parse_args()
 
 namep=args.prefix.split('/')[-1]
-outf_prefix=f'{namep}_{args.fold}_e{args.epochs}_{args.loss}_{args.optimizer}_lr{args.lr}_m{args.momentum}_wd{args.weight_decay}'
+outf_prefix=f'{namep}_{args.fold}_e{args.epochs}_{args.loss}_{args.optimizer}_lr{args.lr}_m{args.momentum}_wd{args.weight_decay}_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}'
 
 #wandb things
 wandb.init(project='MAT',name=outf_prefix)
@@ -106,16 +83,16 @@ d_atom = trainX[0][0].shape[1]
 # Since we are using the provided pretrained weights -- these are locked in place
 model_params= {
     'd_atom': d_atom,
-    'd_model': 1024,
-    'N': 8,
-    'h': 16,
-    'N_dense': 1,
-    'lambda_attention': 0.33, 
-    'lambda_distance': 0.33,
+    'd_model': args.dmodel,
+    'N': args.nstacklayers,
+    'h': args.heads,
+    'N_dense': args.Ndense,
+    'lambda_attention': args.lattn, 
+    'lambda_distance': args.ldist,
     'leaky_relu_slope': 0.1, 
     'dense_output_nonlinearity': 'relu', 
     'distance_matrix_kernel': 'exp', 
-    'dropout': 0.0,
+    'dropout': args.dropout,
     'aggregation_type': 'mean'
 }
 
@@ -178,19 +155,34 @@ for epoch in range(args.epochs):
         else:
             loss=criterion(y_pred,y)
         losses.append(loss.item())
-        
+        wandb.log({"Train Loss":loss.item()},step=iteration)
+
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
-        if iteration%100==0:
+        torch.cuda.empty_cache()
+
+        if iteration%1000==0:
             #we evaluate the test set.
-            test_rmse,test_r2=eval_test(model,testdata_loader)
+            model.eval()
+            gold=np.array([])
+            preds=np.array([])
+
+            for t_batch in testdata_loader:
+                t_adjacency_matrix, t_node_features, t_distance_matrix, t_y = t_batch
+                gold=np.append(gold,t_y.tolist())
+                t_batch_mask = torch.sum(torch.abs(t_node_features), dim=-1) != 0
+                t_y_pred = model(t_node_features, t_batch_mask, t_adjacency_matrix, t_distance_matrix, None)
+                preds=np.append(preds,t_y_pred.tolist())
+                torch.cuda.empty_cache()
+
+            test_rmse=np.sqrt(np.mean(preds-gold)**2)
+            test_r2=np.corrcoef(preds,gold)[0][1]**2
             model.train()
             wandb.log({"Test RMSE":test_rmse,"Test R2":test_r2},step=iteration)
 
-        wandb.log({"Train Loss":loss.item()},step=iteration)
-
+    #end of 1 epoch -- time to log the stats
     train_rmse, train_r2=(np.sqrt(np.mean(epoch_preds-epoch_gold)**2), np.corrcoef(epoch_preds,epoch_gold)[0][1]**2)
     wandb.log({"Train Epoch RMSE":train_rmse,"Train Epoch R2":train_r2},step=iteration)
 
@@ -227,6 +219,7 @@ for batch in testdata_loader:
     batch_mask = torch.sum(torch.abs(node_features), dim=-1) != 0
     y_pred = model(node_features, batch_mask, adjacency_matrix, distance_matrix, None)
     preds=np.append(preds,y_pred.tolist())
+    torch.cuda.empty_cache()
 
 r2=np.corrcoef(preds,gold)[0][1]**2
 rmse=np.sqrt(np.mean(preds-gold)**2)
@@ -237,6 +230,8 @@ testdic={
     'RMSE':rmse,
     'R2':r2
 }
+
+wandb.log({"Test RMSE":rmse,"Test R2":r2},step=iteration)
 
 with open(args.datadir+'/'+outf_prefix+'_testdic.pi','wb') as outfile:
     pickle.dump(testdic,outfile)
