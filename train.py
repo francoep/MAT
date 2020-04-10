@@ -210,10 +210,27 @@ with open(args.datadir+'/'+outf_prefix+'_trainlosses.pi','wb') as outfile:
 with open(args.datadir+'/'+outf_prefix+'_trainepochlosses.pi','wb') as outfile:
     pickle.dump(epoch_mean_losses,outfile)
 
+#final evaluations
+model.eval()
+
+#first the training set
+gold=np.array([])
+preds=np.array([])
+for batch in data_loader:
+    adjacency_matrix, node_features, distance_matrix, y = batch
+    gold=np.append(gold,y.tolist())
+    batch_mask = torch.sum(torch.abs(node_features), dim=-1) != 0
+    y_pred = model(node_features, batch_mask, adjacency_matrix, distance_matrix, None)
+    preds=np.append(preds,y_pred.tolist())
+    torch.cuda.empty_cache()
+
+r2=np.corrcoef(preds,gold)[0][1]**2
+rmse=np.sqrt(np.mean(preds-gold)**2)
+wandb.log({"Train Epoch RMSE":rmse,"Train Epoch R2":r2},step=iteration+1)
+
 #we need to evaluate the test_set
 gold=np.array([])
 preds=np.array([])
-model.eval()
 for batch in testdata_loader:
     adjacency_matrix, node_features, distance_matrix, y = batch
     gold=np.append(gold,y.tolist())
@@ -232,7 +249,7 @@ testdic={
     'R2':r2
 }
 
-wandb.log({"Test RMSE":rmse,"Test R2":r2},step=iteration)
+wandb.log({"Test RMSE":rmse,"Test R2":r2},step=iteration+1)
 
 with open(args.datadir+'/'+outf_prefix+'_testdic.pi','wb') as outfile:
     pickle.dump(testdic,outfile)
