@@ -178,7 +178,7 @@ for epoch in range(args.epochs):
                 preds=np.append(preds,t_y_pred.tolist())
                 torch.cuda.empty_cache()
 
-            test_rmse=np.sqrt(np.mean(preds-gold)**2)
+            test_rmse=np.sqrt(np.mean((preds-gold)**2))
             test_r2=np.corrcoef(preds,gold)[0][1]**2
             model.train()
             wandb.log({"Test RMSE":test_rmse,"Test R2":test_r2},step=iteration)
@@ -225,7 +225,7 @@ for batch in data_loader:
     torch.cuda.empty_cache()
 
 r2=np.corrcoef(preds,gold)[0][1]**2
-rmse=np.sqrt(np.mean(preds-gold)**2)
+rmse=np.sqrt(np.mean((preds-gold)**2))
 wandb.log({"Train Epoch RMSE":rmse,"Train Epoch R2":r2},step=iteration+1)
 
 #we need to evaluate the test_set
@@ -240,7 +240,7 @@ for batch in testdata_loader:
     torch.cuda.empty_cache()
 
 r2=np.corrcoef(preds,gold)[0][1]**2
-rmse=np.sqrt(np.mean(preds-gold)**2)
+rmse=np.sqrt(np.mean((preds-gold)**2))
 
 testdic={
     'predicted':preds,
