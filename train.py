@@ -58,7 +58,7 @@ wandb.init(project='MAT',name=outf_prefix)
 assert args.loss in set(['mse','mae','huber','logcosh']) and args.optimizer in set(['sgd','adam'])
 
 #checking if we need 2donly things
-if '_2d_' in args.prefix:
+if '_2d' in args.prefix:
     need2d=True
 else:
     need2d=False
