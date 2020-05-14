@@ -25,7 +25,6 @@ parser.add_argument('--fold',type=str,required=True,help='Fold for the datafiles
 parser.add_argument('--pretrain',action='store_true',default=False,help='Flag to use the pretrained weights. If set, will use. Assumed to be pretrained_weights.pt')
 parser.add_argument('--datadir',type=str,default='sweep',help='Absolutepath to the directory for the data from training and testing the model (Def: sweep). Saved filenames will be <prefix>_<fold>_e<epochs>_<loss>_<optimizer>_lr<lr>_m<momentum>_wd<weightdecay>_<trainlosses|trainepochlosses|testdic>.pi')
 parser.add_argument('--savemodel', action='store_true',default=False,help='Flag to save the trained model. The filename will be <prefix>_<fold>_trained.model')
-parser.add_argument('--only2d',action='store_true',default=False,help='Flag to only use 2D conformers for making the distance matrix.')
 parser.add_argument('-e','--epochs', type=int, default=500,help='Number of epochs to train the model for. Defaults to 500')
 parser.add_argument('-l','--loss',type=str,default='mse',help='Loss Function to use: mse, mae, huber, or logcosh.')
 parser.add_argument('-o','--optimizer',type=str,default='sgd',help='Optimizer for training the model: sgd, or adam.')
@@ -45,6 +44,8 @@ parser.add_argument('--dmodel',type=int,default=1024,help='Dimension of the hidd
 parser.add_argument('--nstacklayers',type=int,default=8,help='Number of stacks in the Encoder layer. Defaults to 8')
 parser.add_argument('--cpu',action='store_true',default=False,help='Flag to have model be CPU only.')
 parser.add_argument('--wandb',action='store_true',default=False,help='Flag if using Weights and Biases to log.')
+parser.add_argument('--only2d',action='store_true',default=False,help='Flag to only use 2D conformers for making the distance matrix.')
+
 
 args=parser.parse_args()
 
