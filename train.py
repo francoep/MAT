@@ -290,9 +290,11 @@ testdic={
     'Testtimes':test_times
 }
 
+print('Test RMSE:',rmse)
+print('Test R2  :',r2)
+
 if args.wandb:
     wandb.log({"Test RMSE":rmse,"Test R2":r2},step=iteration+1)
-
 
 with open(args.datadir+'/'+outf_prefix+'_testdic.pi','wb') as outfile:
     pickle.dump(testdic,outfile)
