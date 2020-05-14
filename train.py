@@ -44,7 +44,7 @@ parser.add_argument('--dmodel',type=int,default=1024,help='Dimension of the hidd
 parser.add_argument('--nstacklayers',type=int,default=8,help='Number of stacks in the Encoder layer. Defaults to 8')
 parser.add_argument('--cpu',action='store_true',default=False,help='Flag to have model be CPU only.')
 parser.add_argument('--wandb',action='store_true',default=False,help='Flag if using Weights and Biases to log.')
-parser.add_argument('--twoD',action='store_true',default=False,help='Flag to only use 2D conformers for making the distance matrix.')
+parser.add_argument('--twod',action='store_true',default=False,help='Flag to only use 2D conformers for making the distance matrix.')
 
 
 args=parser.parse_args()
@@ -72,9 +72,9 @@ print('Loading train and test data')
 
 #loading the training & testing data
 batch_size=8
-trainX, trainy=load_data_from_df(trainfile,one_hot_formal_charge=True,two_d_only=args.only2d)
+trainX, trainy=load_data_from_df(trainfile,one_hot_formal_charge=True,two_d_only=args.twod)
 data_loader=construct_loader(trainX,trainy,batch_size)
-testX, testy=load_data_from_df(testfile,one_hot_formal_charge=True,two_d_only=args.only2d)
+testX, testy=load_data_from_df(testfile,one_hot_formal_charge=True,two_d_only=args.twod)
 testdata_loader=construct_loader(testX,testy,batch_size)
 
 
