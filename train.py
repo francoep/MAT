@@ -54,7 +54,10 @@ else:
     from featurization.data_utils import load_data_from_df, construct_loader
 
 namep=args.prefix.split('/')[-1]
-outf_prefix=f'{namep}_{args.fold}_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}'
+if args.cpu:
+    outf_prefix=f'{namep}_cpu_{args.fold}_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}'
+else:
+    outf_prefix=f'{namep}_{args.fold}_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}'
 
 #wandb things
 if args.wandb:
@@ -289,6 +292,7 @@ testdic={
 
 if args.wandb:
     wandb.log({"Test RMSE":rmse,"Test R2":r2},step=iteration+1)
+
 
 with open(args.datadir+'/'+outf_prefix+'_testdic.pi','wb') as outfile:
     pickle.dump(testdic,outfile)
