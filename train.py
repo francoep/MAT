@@ -46,7 +46,6 @@ parser.add_argument('--cpu',action='store_true',default=False,help='Flag to have
 parser.add_argument('--wandb',action='store_true',default=False,help='Flag if using Weights and Biases to log.')
 parser.add_argument('--twod',action='store_true',default=False,help='Flag to only use 2D conformers for making the distance matrix.')
 
-
 args=parser.parse_args()
 
 if args.cpu:
