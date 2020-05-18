@@ -45,6 +45,7 @@ parser.add_argument('--nstacklayers',type=int,default=8,help='Number of stacks i
 parser.add_argument('--cpu',action='store_true',default=False,help='Flag to have model be CPU only.')
 parser.add_argument('--wandb',action='store_true',default=False,help='Flag if using Weights and Biases to log.')
 parser.add_argument('--twod',action='store_true',default=False,help='Flag to only use 2D conformers for making the distance matrix.')
+parser.add_argument('--skip_train',action='store_true',help='Flag to skip training, and jump right into evaluations.')
 
 args=parser.parse_args()
 
@@ -144,85 +145,86 @@ elif args.optimizer=='adam':
 
 losses=[]
 
-print('Training')
-#Training loop
-iteration=0
-for epoch in range(args.epochs):
-    epoch_preds=np.array([])
-    epoch_gold=np.array([])
-    for batch in data_loader:
-        iteration+=1
-        adjacency_matrix, node_features, distance_matrix, y = batch
-        batch_mask = torch.sum(torch.abs(node_features), dim=-1) != 0
-        y_pred = model(node_features, batch_mask, adjacency_matrix, distance_matrix, None)
+if not args.skip_train:
+    print('Training')
+    #Training loop
+    iteration=0
+    for epoch in range(args.epochs):
+        epoch_preds=np.array([])
+        epoch_gold=np.array([])
+        for batch in data_loader:
+            iteration+=1
+            adjacency_matrix, node_features, distance_matrix, y = batch
+            batch_mask = torch.sum(torch.abs(node_features), dim=-1) != 0
+            y_pred = model(node_features, batch_mask, adjacency_matrix, distance_matrix, None)
 
-        #accumulate the epoch training datas
-        epoch_gold=np.append(epoch_gold,y.tolist())
-        epoch_preds=np.append(epoch_preds,y_pred.tolist())
-        
-        if criterion==None and args.loss=='logcosh':
-            loss=logcosh_loss(y_pred,y)
-        else:
-            loss=criterion(y_pred,y)
-        losses.append(loss.item())
-        if args.wandb:
-            wandb.log({"Train Loss":loss.item()},step=iteration)
-
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-        if not args.cpu:
-            torch.cuda.empty_cache()
-
-        if iteration%1000==0:
-            #we evaluate the test set.
-            model.eval()
-            gold=np.array([])
-            preds=np.array([])
-
-            for t_batch in testdata_loader:
-                t_adjacency_matrix, t_node_features, t_distance_matrix, t_y = t_batch
-                gold=np.append(gold,t_y.tolist())
-                t_batch_mask = torch.sum(torch.abs(t_node_features), dim=-1) != 0
-                t_y_pred = model(t_node_features, t_batch_mask, t_adjacency_matrix, t_distance_matrix, None)
-                preds=np.append(preds,t_y_pred.tolist())
-                if not args.cpu:
-                    torch.cuda.empty_cache()
-
-            test_rmse=np.sqrt(np.mean((preds-gold)**2))
-            test_r2=np.corrcoef(preds,gold)[0][1]**2
-            model.train()
+            #accumulate the epoch training datas
+            epoch_gold=np.append(epoch_gold,y.tolist())
+            epoch_preds=np.append(epoch_preds,y_pred.tolist())
+            
+            if criterion==None and args.loss=='logcosh':
+                loss=logcosh_loss(y_pred,y)
+            else:
+                loss=criterion(y_pred,y)
+            losses.append(loss.item())
             if args.wandb:
-                wandb.log({"Test RMSE":test_rmse,"Test R2":test_r2},step=iteration)
+                wandb.log({"Train Loss":loss.item()},step=iteration)
 
-    #end of 1 epoch -- time to log the stats
-    train_rmse, train_r2=(np.sqrt(np.mean(epoch_preds-epoch_gold)**2), np.corrcoef(epoch_preds,epoch_gold)[0][1]**2)
-    if args.wandb:
-        wandb.log({"Train Epoch RMSE":train_rmse,"Train Epoch R2":train_r2},step=iteration)
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
 
-print('Training Complete!')
-#saving the trained model
-if args.savemodel:
-    torch.save(model.state_dict(),args.prefix+'_'+args.fold+'_trained.model')
+            if not args.cpu:
+                torch.cuda.empty_cache()
 
-#now that the training is complete -- we need to output the training losses
-epoch_mean_losses=[]
-for i in range(int(len(losses)/len(data_loader))):
-    tmp=[]
-    for j in range(int(len(data_loader))):
-        tmp.append(losses[int(j+i*len(losses)/len(data_loader))])
-    epoch_mean_losses.append(np.mean(tmp))
+            if iteration%1000==0:
+                #we evaluate the test set.
+                model.eval()
+                gold=np.array([])
+                preds=np.array([])
 
-#making the directory for the data
-if not os.path.isdir(args.datadir):
-    os.mkdir(args.datadir)
+                for t_batch in testdata_loader:
+                    t_adjacency_matrix, t_node_features, t_distance_matrix, t_y = t_batch
+                    gold=np.append(gold,t_y.tolist())
+                    t_batch_mask = torch.sum(torch.abs(t_node_features), dim=-1) != 0
+                    t_y_pred = model(t_node_features, t_batch_mask, t_adjacency_matrix, t_distance_matrix, None)
+                    preds=np.append(preds,t_y_pred.tolist())
+                    if not args.cpu:
+                        torch.cuda.empty_cache()
 
-#saving the training losses
-with open(args.datadir+'/'+outf_prefix+'_trainlosses.pi','wb') as outfile:
-    pickle.dump(losses,outfile)
-with open(args.datadir+'/'+outf_prefix+'_trainepochlosses.pi','wb') as outfile:
-    pickle.dump(epoch_mean_losses,outfile)
+                test_rmse=np.sqrt(np.mean((preds-gold)**2))
+                test_r2=np.corrcoef(preds,gold)[0][1]**2
+                model.train()
+                if args.wandb:
+                    wandb.log({"Test RMSE":test_rmse,"Test R2":test_r2},step=iteration)
+
+        #end of 1 epoch -- time to log the stats
+        train_rmse, train_r2=(np.sqrt(np.mean(epoch_preds-epoch_gold)**2), np.corrcoef(epoch_preds,epoch_gold)[0][1]**2)
+        if args.wandb:
+            wandb.log({"Train Epoch RMSE":train_rmse,"Train Epoch R2":train_r2},step=iteration)
+
+    #now that the training is complete -- we need to output the training losses
+    epoch_mean_losses=[]
+    for i in range(int(len(losses)/len(data_loader))):
+        tmp=[]
+        for j in range(int(len(data_loader))):
+            tmp.append(losses[int(j+i*len(losses)/len(data_loader))])
+        epoch_mean_losses.append(np.mean(tmp))
+
+    print('Training Complete!')
+    #saving the trained model
+    if args.savemodel:
+        torch.save(model.state_dict(),args.prefix+'_'+args.fold+'_trained.model')
+
+    #making the directory for the data
+    if not os.path.isdir(args.datadir):
+        os.mkdir(args.datadir)
+
+    #saving the training losses
+    with open(args.datadir+'/'+outf_prefix+'_trainlosses.pi','wb') as outfile:
+        pickle.dump(losses,outfile)
+    with open(args.datadir+'/'+outf_prefix+'_trainepochlosses.pi','wb') as outfile:
+        pickle.dump(epoch_mean_losses,outfile)
 
 #final evaluations
 print('Final Evaluations!')
