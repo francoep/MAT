@@ -46,6 +46,7 @@ parser.add_argument('--cpu',action='store_true',default=False,help='Flag to have
 parser.add_argument('--wandb',action='store_true',default=False,help='Flag if using Weights and Biases to log.')
 parser.add_argument('--twod',action='store_true',default=False,help='Flag to only use 2D conformers for making the distance matrix.')
 parser.add_argument('--skip_train',action='store_true',help='Flag to skip training, and jump right into evaluations.')
+parser.add_argument('--seed',type=int,default=420,help='Random seed for training the models.')
 
 args=parser.parse_args()
 
@@ -53,6 +54,8 @@ if args.cpu:
     from featurization.cpu_data_utils import load_data_from_df, construct_loader
 else:
     from featurization.data_utils import load_data_from_df, construct_loader
+    torch.backends.cudnn.deterministic=True
+    torch.backends.cudnn.benchmark=False
 
 namep=args.prefix.split('/')[-1]
 if args.cpu:
@@ -72,6 +75,10 @@ print('Trainfile:',trainfile)
 print('Testfile:',testfile)
 print('Outfile Prefix:',outf_prefix)
 print('Loading train and test data')
+
+#setting the specified random seed.
+torch.manual_seed(args.seed)
+np.random.seed(args.seed)
 
 #loading the training & testing data
 batch_size=8
@@ -102,10 +109,11 @@ print('Making Model')
 
 model=make_model(**model_params)
 param_count=sum(p.numel() for p in model.parameters() if p.requires_grad)
-print('Number of parameters:',param_count)
+print('Number of parameters:',param_count,step=0)
 
 if args.wandb:
     wandb.watch(model,'all')
+    wandb.log({'Parameters':param_count})
 
 if args.pretrain:
     print('Using Pretrained Weights')
