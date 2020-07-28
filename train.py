@@ -109,11 +109,11 @@ print('Making Model')
 
 model=make_model(**model_params)
 param_count=sum(p.numel() for p in model.parameters() if p.requires_grad)
-print('Number of parameters:',param_count,step=0)
+print('Number of parameters:',param_count)
 
 if args.wandb:
     wandb.watch(model,'all')
-    wandb.log({'Parameters':param_count})
+    wandb.log({'Parameters':param_count},step=0)
 
 if args.pretrain:
     print('Using Pretrained Weights')
