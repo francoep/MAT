@@ -4,6 +4,7 @@ command:
   - python3
   - ${program}
   - ${args}
+  - --wandb
 method: grid
 parameters: 
   prefix:
