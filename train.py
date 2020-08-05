@@ -259,7 +259,10 @@ for batch in data_loader:
 
     train_times.append((tload,tpred))
 
-print('Overall Time: ',time.time()-t0)
+ttime=time.time()-t0
+print('Overall Time: ',ttime)
+if args.wandb:
+    wandb.log({'Train Eval Time':ttime},step=iteration+1)
 
 r2=np.corrcoef(preds,gold)[0][1]**2
 rmse=np.sqrt(np.mean((preds-gold)**2))
@@ -286,7 +289,10 @@ for batch in testdata_loader:
 
     test_times.append((tload,tpred))
 
-print('Overall Time: ',time.time()-t0)
+ttime=time.time()-t0
+print('Overall Time: ',ttime)
+if args.wandb:
+    wandb.log({'Test Eval Time':ttime},step=iteration+1)
 
 r2=np.corrcoef(preds,gold)[0][1]**2
 rmse=np.sqrt(np.mean((preds-gold)**2))
