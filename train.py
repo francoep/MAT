@@ -207,7 +207,7 @@ if not args.skip_train:
                     wandb.log({"Test RMSE":test_rmse,"Test R2":test_r2},step=iteration)
 
         #end of 1 epoch -- time to log the stats
-        train_rmse, train_r2=(np.sqrt(np.mean(epoch_preds-epoch_gold)**2), np.corrcoef(epoch_preds,epoch_gold)[0][1]**2)
+        train_rmse, train_r2=(np.sqrt(np.mean((epoch_preds-epoch_gold)**2)), np.corrcoef(epoch_preds,epoch_gold)[0][1]**2)
         if args.wandb:
             wandb.log({"Train Epoch RMSE":train_rmse,"Train Epoch R2":train_r2},step=iteration)
 
@@ -240,7 +240,6 @@ print('Training Set:')
 model.eval()
 
 #first the training set
-#TODO -- Implement timing here -- 
 gold=np.array([])
 preds=np.array([])
 t0=time.time()
