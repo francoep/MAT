@@ -222,7 +222,8 @@ if not args.skip_train:
     print('Training Complete!')
     #saving the trained model
     if args.savemodel:
-        torch.save(model.state_dict(),args.prefix+'_'+args.fold+'_trained.model')
+        print('Saving Model:'args.datadir+'/'+outf_prefix+'_trained.model')
+        torch.save(model.state_dict(),args.datadir+'/'+outf_prefix+'_trained.model')
 
     #making the directory for the data
     if not os.path.isdir(args.datadir):
