@@ -77,7 +77,7 @@ if args.stats:
 preds=np.array([])
 ys=np.array([])
 for batch in data_loader:
-	adjacency_matric, node_features,distance_matrix,y=batch
+	adjacency_matrix, node_features,distance_matrix,y=batch
 	batch_mask=torch.sum(torch.abs(node_features),dim=-1) != 0
 	pred=model(node_features,batch_mask,adjacency_matrix,distance_matrix,None)
 	preds=np.append(preds,pred.tolist())
