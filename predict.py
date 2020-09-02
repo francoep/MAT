@@ -59,14 +59,7 @@ model_params={
 }
 
 model=make_model(**model_params)
-state_dict=torch.load(args.model)
-model_state_dict=model.state_dict()
-for name, param in state_dict.items():
-	if 'generator' in name:
-		continue
-	if isinstance(param,torch.nn.Parameter):
-		param=param.data
-	model_state_dict[name].copy_(param)
+model.load_state_dict(torch.load(args.model))
 model.cuda()
 model.eval()
 
