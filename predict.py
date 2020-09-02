@@ -25,8 +25,8 @@ parser=argparse.ArgumentParser(description='Predict MAT model on a given test se
 parser.add_argument('-m','--model',type=str,required=True,help='Trained torch model file')
 parser.add_argument('-i','--input',type=str,required=True,help='File to evaluate. Assumed format is "<SMILE>,<solubility>"')
 parser.add_argument('-o','--output',type=str,required=True,help='File for Predictions. Format is "<SMILE>,<True>,<Predicted>"')
-parser.add_argument('--stats',default=False,help='Flag to print the R2, RMSE, and the time to perform the evaluation.')
-parser.add_argument('--twod',default=False,help='Flag to use 2D conformers for distance matrix.')
+parser.add_argument('--stats',default=False,action='store_true',help='Flag to print the R2, RMSE, and the time to perform the evaluation.')
+parser.add_argument('--twod',default=False,action='store_true',help='Flag to use 2D conformers for distance matrix.')
 args=parser.parse_args()
 
 if args.stats:
