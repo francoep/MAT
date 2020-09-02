@@ -68,6 +68,7 @@ for name, param in state_dict.items():
 		param=param.data
 	model_state_dict[name].copy_(param)
 model.eval()
+model.cuda()
 
 if args.stats:
 	print('Model construction time:',time.time()-start)
