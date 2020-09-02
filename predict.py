@@ -33,7 +33,7 @@ if args.stats:
 	start=time.time()
 
 #loading the data
-X,gold=load_data_from_df(args.input,one_hot_formal_charge=True,use_data_saving=False,two_d_only=args.twod)
+X,gold=load_data_from_df(args.input,one_hot_formal_charge=True,use_data_saving=True,two_d_only=args.twod)
 data_loader=construct_loader(X,gold,batch_size=8,shuffle=False)
 
 if args.stats:
