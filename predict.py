@@ -97,4 +97,4 @@ with open(args.output,'w') as outfile:
 	assert len(lines)==len(preds)
 
 	for l,p in zip(lines,preds):
-		outfile.write(l.rstrip()+','+str(p))
+		outfile.write(l.rstrip()+','+str(p)+'\n')
