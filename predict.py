@@ -67,8 +67,8 @@ for name, param in state_dict.items():
 	if isinstance(param,torch.nn.Parameter):
 		param=param.data
 	model_state_dict[name].copy_(param)
-model.eval()
 model.cuda()
+model.eval()
 
 if args.stats:
 	print('Model construction time:',time.time()-start)
