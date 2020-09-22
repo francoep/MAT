@@ -59,11 +59,6 @@ else:
     torch.backends.cudnn.deterministic=True
     torch.backends.cudnn.benchmark=False
 
-#wandb things
-if args.wandb:
-    #wandb.init(project='MAT',name=outf_prefix)  #this was from running the sweeps
-    wandb.init(project='mat_independent_set_tests',name=outf_prefix)
-
 assert args.loss in set(['mse','mae','huber','logcosh']) and args.optimizer in set(['sgd','adam'])
 
 
@@ -92,6 +87,11 @@ else:
         outf_prefix=f'{namep}_cpu_{args.fold}_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}'
     else:
         outf_prefix=f'{namep}_{args.fold}_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}'
+
+#wandb things
+if args.wandb:
+    #wandb.init(project='MAT',name=outf_prefix)  #this was from running the sweeps
+    wandb.init(project='mat_independent_set_tests',name=outf_prefix)
 
 print('Trainfile:',trainfile)
 print('Testfile:',testfile)
