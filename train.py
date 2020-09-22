@@ -61,7 +61,8 @@ else:
 
 #wandb things
 if args.wandb:
-    wandb.init(project='MAT',name=outf_prefix)
+    #wandb.init(project='MAT',name=outf_prefix)  #this was from running the sweeps
+    wandb.init(project='mat_independent_set_tests',name=outf_prefix)
 
 assert args.loss in set(['mse','mae','huber','logcosh']) and args.optimizer in set(['sgd','adam'])
 
