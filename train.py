@@ -19,9 +19,11 @@ from transformer import make_model
 import pickle
 
 
-parser=argparse.ArgumentParser(description='Train and test MAT model on datasets')
-parser.add_argument('--prefix',type=str,required=True,help='Prefix for the train and test data. Assumed to follow <prefix>_train<fold>.csv')
-parser.add_argument('--fold',type=str,required=True,help='Fold for the datafiles.')
+parser=argparse.ArgumentParser(description='Train and test MAT model on datasets. Use either --trainfile  & --testfile OR --prefix & --fold. --trainfile will be preferred if both are set.')
+parser.add_argument('--trainfile',type=str,default='',help='Specify training data file for model. Requires the use of --testfile.')
+parser.add_argument('--testfile',type=str,default='',help='Spefify testing data file for model. Used in conjunction with --trainfile.')
+parser.add_argument('--prefix',type=str,default='',help='Prefix for the train and test data. Assumed to follow <prefix>_train<fold>.csv. Requires --testfile.')
+parser.add_argument('--fold',type=str,default='',help='Fold for the datafiles. Used in conjunction with --prefix')
 parser.add_argument('--pretrain',action='store_true',default=False,help='Flag to use the pretrained weights. If set, will use. Assumed to be pretrained_weights.pt')
 parser.add_argument('--datadir',type=str,default='sweep',help='Absolutepath to the directory for the data from training and testing the model (Def: sweep). Saved filenames will be <prefix>_<fold>_e<epochs>_<loss>_<optimizer>_lr<lr>_m<momentum>_wd<weightdecay>_<trainlosses|trainepochlosses|testdic>.pi')
 parser.add_argument('--savemodel', action='store_true',default=False,help='Flag to save the trained model. The filename will be <prefix>_<fold>_trained.model')
@@ -57,20 +59,40 @@ else:
     torch.backends.cudnn.deterministic=True
     torch.backends.cudnn.benchmark=False
 
-namep=args.prefix.split('/')[-1]
-if args.cpu:
-    outf_prefix=f'{namep}_cpu_{args.fold}_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}'
+assert args.loss in set(['mse','mae','huber','logcosh']) and args.optimizer in set(['sgd','adam'])
+
+
+#checking that the correct train/test file pointers are set correctly.
+if args.trainfile:
+    assert (bool(args.testfile)),'Need to set --testfile when trainfile is set'
+elif args.prefix:
+    assert (bool(args.fold)),'Need to set --fold when prefix is set'
 else:
-    outf_prefix=f'{namep}_{args.fold}_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}'
+    print('Need to set either trainfile/testfile OR prefix/fold!')
+    sys.exit(1)
+
+#now that the input from the arguments is sanitized, we can proceed with the script
+if args.trainfile:
+    trainfile=args.trainfile
+    testfile=args.testfile
+    if args.cpu:
+        outf_prefix=f'aqsol_test_ind_cpu_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}'
+    else:
+        outf_prefix=f'aqsol_test_ind_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}'
+else:
+    trainfile=args.prefix+'_train'+args.fold+'.csv'
+    testfile=args.prefix+'_test'+args.fold+'.csv'
+    namep=args.prefix.split('/')[-1]
+    if args.cpu:
+        outf_prefix=f'{namep}_cpu_{args.fold}_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}'
+    else:
+        outf_prefix=f'{namep}_{args.fold}_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}'
 
 #wandb things
 if args.wandb:
-    wandb.init(project='MAT',name=outf_prefix)
+    #wandb.init(project='MAT',name=outf_prefix)  #this was from running the sweeps
+    wandb.init(project='mat_independent_set_tests',name=outf_prefix)
 
-assert args.loss in set(['mse','mae','huber','logcosh']) and args.optimizer in set(['sgd','adam'])
-
-trainfile=args.prefix+'_train'+args.fold+'.csv'
-testfile=args.prefix+'_test'+args.fold+'.csv'
 print('Trainfile:',trainfile)
 print('Testfile:',testfile)
 print('Outfile Prefix:',outf_prefix)
