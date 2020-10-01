@@ -202,6 +202,10 @@ if not args.skip_train:
 
             optimizer.zero_grad()
             loss.backward()
+            
+            #implementing gradient clipping -- First trying a clip of 10
+            torch.nn.utils.clip_grad_norm(model.parameters(), 10)
+
             optimizer.step()
 
             if not args.cpu:
