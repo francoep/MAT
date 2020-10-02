@@ -184,6 +184,7 @@ if not args.skip_train:
         epoch_gold=np.array([])
         for batch in data_loader:
             iteration+=1
+            optimizer.zero_grad()
             adjacency_matrix, node_features, distance_matrix, y = batch
             batch_mask = torch.sum(torch.abs(node_features), dim=-1) != 0
             y_pred = model(node_features, batch_mask, adjacency_matrix, distance_matrix, None)
@@ -200,11 +201,10 @@ if not args.skip_train:
             if args.wandb:
                 wandb.log({"Train Loss":loss.item()},step=iteration)
 
-            optimizer.zero_grad()
             loss.backward()
 
-            #implementing gradient clipping -- First trying a clip of 10(xx), 1
-            torch.nn.utils.clip_grad_norm(model.parameters(), 1)
+            #implementing gradient clipping -- First trying a clip of 10(xx), 1(xx), 0.5
+            torch.nn.utils.clip_grad_norm(model.parameters(), 0.5)
 
             optimizer.step()
 
