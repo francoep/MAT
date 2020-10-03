@@ -203,8 +203,8 @@ if not args.skip_train:
 
             loss.backward()
 
-            #implementing gradient clipping -- First trying a clip of 10(xx), 1(xx), 0.5
-            torch.nn.utils.clip_grad_norm(model.parameters(), 0.5)
+            #implementing gradient clipping -- First trying a clip of 10(xx), 1(xx), 0.5 (xx), 0.1
+            torch.nn.utils.clip_grad_norm(model.parameters(), 0.1)
 
             optimizer.step()
 
