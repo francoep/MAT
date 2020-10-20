@@ -22,8 +22,6 @@ from featurization.data_utils import load_data_from_df, construct_loader
 import pickle
 import re
 
-salt_frag/aqsol_scaf_2d_splitsalt_2_drop0.1_ldist0.0_lattn0.33_Ndense1_heads8_dmodel1024_nsl18_trained.model
-
 def parse_model_options(filename):
 	'''
 	This function parses out the the following from the filename:
