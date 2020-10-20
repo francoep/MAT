@@ -40,13 +40,13 @@ def parse_model_options(filename):
 		the same order
 	'''
 
-	drop=float(re.search(r'drop(\d+.?\d*)',filename).group(1))
-	ldist=float(re.search(r'ldist(\d+.?\d*)',filename).group(1))
-	lattn=float(re.search(r'lattn(\d+.?\d*)',filename).group(1))
-	nDense=int(re.search(r'Ndense(\d+.?\d*)',filename).group(1))
-	heads=int(re.search(r'heads(\d+.?\d*)',filename).group(1))
-	dmodel=int(re.search(r'dmodel(\d+.?\d*)',filename).group(1))
-	nsl=int(re.search(r'nsl(\d+.?\d*)',filename).group(1))
+	drop=float(re.search(r'drop(\d+\.?\d*)',filename).group(1))
+	ldist=float(re.search(r'ldist(\d+\.?\d*)',filename).group(1))
+	lattn=float(re.search(r'lattn(\d+\.?\d*)',filename).group(1))
+	nDense=int(re.search(r'Ndense(\d+\.?\d*)',filename).group(1))
+	heads=int(re.search(r'heads(\d+\.?\d*)',filename).group(1))
+	dmodel=int(re.search(r'dmodel(\d+\.?\d*)',filename).group(1))
+	nsl=int(re.search(r'nsl(\d+\.?\d*)',filename).group(1))
 
 	return drop,ldist,lattn,nDense,heads,dmodel,nsl
 
