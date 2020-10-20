@@ -20,6 +20,37 @@ import time
 from transformer import make_model
 from featurization.data_utils import load_data_from_df, construct_loader
 import pickle
+import re
+
+salt_frag/aqsol_scaf_2d_splitsalt_2_drop0.1_ldist0.0_lattn0.33_Ndense1_heads8_dmodel1024_nsl18_trained.model
+
+def parse_model_options(filename):
+	'''
+	This function parses out the the following from the filename:
+		dropout                    | _drop{#}_
+		lambda_distance            | _ldist{#}_
+		lanmbda_attention          | _lattn{#}_
+		number of dense layers     | _Ndense{#}_
+		heads                      | _heads{#}_
+		dimension of model         | _dmodel{#}_
+		number of stacked layers   | _nsl{#}_
+
+	--ASSUMPTIONS--
+		Assumes that the file's name has the convention specified above!
+
+	--Returns--
+		the same order
+	'''
+
+	drop=float(re.search(r'drop(\d+.?\d*)',filename).group(1))
+	ldist=float(re.search(r'ldist(\d+.?\d*)',filename).group(1))
+	lattn=float(re.search(r'lattn(\d+.?\d*)',filename).group(1))
+	nDense=int(re.search(r'Ndense(\d+.?\d*)',filename).group(1))
+	heads=int(re.search(r'heads(\d+.?\d*)',filename).group(1))
+	dmodel=int(re.search(r'dmodel(\d+.?\d*)',filename).group(1))
+	nsl=int(re.search(r'nsl(\d+.?\d*)',filename).group(1))
+
+	return drop,ldist,lattn,nDense,heads,dmodel,nsl
 
 parser=argparse.ArgumentParser(description='Predict MAT model on a given test set')
 parser.add_argument('-m','--model',type=str,required=True,help='Trained torch model file')
@@ -42,19 +73,22 @@ if args.stats:
 
 #constructing the model
 ##TODO -- Add functionality to read the model's definition from a file!!
+
+drop,ldist,lattn,nDense,heads,dmodel,nsl=parse_model_options(args.model)
+
 d_atom=X[0][0].shape[1]
 model_params={
 	'd_atom': d_atom,
-    'd_model': 512,
-    'N': 16,
-    'h': 16,
-    'N_dense': 1,
-    'lambda_attention': 0.33, 
-    'lambda_distance': 0.0,
+    'd_model': dmodel,
+    'N': nsl,
+    'h': heads,
+    'N_dense': nDense,
+    'lambda_attention': lattn, 
+    'lambda_distance': ldist,
     'leaky_relu_slope': 0.1, 
     'dense_output_nonlinearity': 'relu', 
     'distance_matrix_kernel': 'exp', 
-    'dropout': 0.1,
+    'dropout': drop,
     'aggregation_type': 'mean'
 }
 
