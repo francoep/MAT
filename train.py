@@ -76,17 +76,17 @@ if args.trainfile:
     trainfile=args.trainfile
     testfile=args.testfile
     if args.cpu:
-        outf_prefix=f'aqsol_test_ind_cpu_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}'
+        outf_prefix=f'aqsol_test_ind_cpu_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}_epochs{args.epochs}'
     else:
-        outf_prefix=f'aqsol_test_ind_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}'
+        outf_prefix=f'aqsol_test_ind_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}_epochs{args.epochs}'
 else:
     trainfile=args.prefix+'_train'+args.fold+'.csv'
     testfile=args.prefix+'_test'+args.fold+'.csv'
     namep=args.prefix.split('/')[-1]
     if args.cpu:
-        outf_prefix=f'{namep}_cpu_{args.fold}_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}'
+        outf_prefix=f'{namep}_cpu_{args.fold}_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}_epochs{args.epochs}'
     else:
-        outf_prefix=f'{namep}_{args.fold}_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}'
+        outf_prefix=f'{namep}_{args.fold}_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}_epochs{args.epochs}'
 
 #wandb things
 if args.wandb:
