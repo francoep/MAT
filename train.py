@@ -45,7 +45,7 @@ parser.add_argument('--heads',type=int,default=16,help='Number of attention head
 parser.add_argument('--dmodel',type=int,default=1024,help='Dimension of the hidden layer for the model. Defaults to 1024.')
 parser.add_argument('--nstacklayers',type=int,default=8,help='Number of stacks in the Encoder layer. Defaults to 8')
 parser.add_argument('--cpu',action='store_true',default=False,help='Flag to have model be CPU only.')
-parser.add_argument('--wandb',,default=None,help='Project name for weights and biases')
+parser.add_argument('--wandb',default=None,help='Project name for weights and biases')
 parser.add_argument('--twod',action='store_true',default=False,help='Flag to only use 2D conformers for making the distance matrix.')
 parser.add_argument('--skip_train',action='store_true',help='Flag to skip training, and jump right into evaluations.')
 parser.add_argument('--seed',type=int,default=420,help='Random seed for training the models.')
