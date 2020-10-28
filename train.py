@@ -91,7 +91,7 @@ else:
 #wandb things
 if args.wandb:
     #wandb.init(project='MAT',name=outf_prefix)  #this was from running the sweeps
-    wandb.init(project='mat_independent_set_tests',name=outf_prefix)
+    wandb.init(project='mat-total-independent',name=outf_prefix)
     #wandb.init(project='mat_training_saltfrags',name=outf_prefix)
 
 print('Trainfile:',trainfile)
