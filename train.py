@@ -45,7 +45,7 @@ parser.add_argument('--heads',type=int,default=16,help='Number of attention head
 parser.add_argument('--dmodel',type=int,default=1024,help='Dimension of the hidden layer for the model. Defaults to 1024.')
 parser.add_argument('--nstacklayers',type=int,default=8,help='Number of stacks in the Encoder layer. Defaults to 8')
 parser.add_argument('--cpu',action='store_true',default=False,help='Flag to have model be CPU only.')
-parser.add_argument('--wandb',action='store_true',default=False,help='Flag if using Weights and Biases to log.')
+parser.add_argument('--wandb',,default=None,help='Project name for weights and biases')
 parser.add_argument('--twod',action='store_true',default=False,help='Flag to only use 2D conformers for making the distance matrix.')
 parser.add_argument('--skip_train',action='store_true',help='Flag to skip training, and jump right into evaluations.')
 parser.add_argument('--seed',type=int,default=420,help='Random seed for training the models.')
@@ -76,23 +76,24 @@ if args.trainfile:
     trainfile=args.trainfile
     testfile=args.testfile
     if args.cpu:
-        outf_prefix=f'aqsol_test_ind_cpu_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}_epochs{args.epochs}'
+        outf_prefix=f'aqsol_test_ind_cpu_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}_epochs{args.epochs}_seed{args.seed}'
     else:
-        outf_prefix=f'aqsol_test_ind_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}_epochs{args.epochs}'
+        outf_prefix=f'aqsol_test_ind_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}_epochs{args.epochs}_seed{args.seed}'
 else:
     trainfile=args.prefix+'_train'+args.fold+'.csv'
     testfile=args.prefix+'_test'+args.fold+'.csv'
     namep=args.prefix.split('/')[-1]
     if args.cpu:
-        outf_prefix=f'{namep}_cpu_{args.fold}_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}_epochs{args.epochs}'
+        outf_prefix=f'{namep}_cpu_{args.fold}_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}_epochs{args.epochs}_seed{args.seed}'
     else:
-        outf_prefix=f'{namep}_{args.fold}_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}_epochs{args.epochs}'
+        outf_prefix=f'{namep}_{args.fold}_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}_epochs{args.epochs}_seed{args.seed}'
+
+if args.twod:
+    outf_prefix.replace('_drop','_2d_drop')
 
 #wandb things
 if args.wandb:
-    #wandb.init(project='MAT',name=outf_prefix)  #this was from running the sweeps
-    wandb.init(project='mat-total-independent',name=outf_prefix)
-    #wandb.init(project='mat_training_saltfrags',name=outf_prefix)
+    wandb.init(project=args.wandb,name=outf_prefix)
 
 print('Trainfile:',trainfile)
 print('Testfile:',testfile)
@@ -138,6 +139,7 @@ if args.wandb:
     wandb.watch(model,'all')
     wandb.log({'Parameters':param_count},step=0)
 
+#todo -- fix pretrain to set the correct weights
 if args.pretrain:
     print('Using Pretrained Weights')
     pretrained_name = 'pretrained_weights.pt'  # This file should be downloaded first (See README.md).
