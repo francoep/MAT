@@ -27,6 +27,7 @@ parser.add_argument('--fold',type=str,default='',help='Fold for the datafiles. U
 parser.add_argument('--pretrain',action='store_true',default=False,help='Flag to use the pretrained weights. If set, will use. Assumed to be pretrained_weights.pt')
 parser.add_argument('--datadir',type=str,default='sweep',help='Absolutepath to the directory for the data from training and testing the model (Def: sweep). Saved filenames will be <prefix>_<fold>_e<epochs>_<loss>_<optimizer>_lr<lr>_m<momentum>_wd<weightdecay>_<trainlosses|trainepochlosses|testdic>.pi')
 parser.add_argument('--savemodel', action='store_true',default=False,help='Flag to save the trained model. The filename will be <prefix>_<fold>_trained.model')
+parser.add_arguement('--dynamic',default=0,type=int,help='Number of epochs improvement on the test set is unobserved to signal training to stop. EX) 2 means after if no improvement after 2 epochs, training will stop. Defaults to not being set.')
 parser.add_argument('-e','--epochs', type=int, default=500,help='Number of epochs to train the model for. Defaults to 500')
 parser.add_argument('-l','--loss',type=str,default='mse',help='Loss Function to use: mse, mae, huber, or logcosh.')
 parser.add_argument('-o','--optimizer',type=str,default='sgd',help='Optimizer for training the model: sgd, or adam.')
@@ -61,7 +62,7 @@ else:
 
 assert args.loss in set(['mse','mae','huber','logcosh']) and args.optimizer in set(['sgd','adam'])
 
-
+assert (args.dynamic >=0 and args.dynamic < args.epochs/2),"--dynamic needs to be a positive integer less than the number of epochs/2"
 #checking that the correct train/test file pointers are set correctly.
 if args.trainfile:
     assert (bool(args.testfile)),'Need to set --testfile when trainfile is set'
@@ -76,17 +77,17 @@ if args.trainfile:
     trainfile=args.trainfile
     testfile=args.testfile
     if args.cpu:
-        outf_prefix=f'aqsol_test_ind_cpu_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}_epochs{args.epochs}_seed{args.seed}'
+        outf_prefix=f'aqsol_test_ind_cpu_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}_epochs{args.epochs}_dyn{args.dynamic}_seed{args.seed}'
     else:
-        outf_prefix=f'aqsol_test_ind_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}_epochs{args.epochs}_seed{args.seed}'
+        outf_prefix=f'aqsol_test_ind_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}_epochs{args.epochs}_dyn{args.dynamic}_seed{args.seed}'
 else:
     trainfile=args.prefix+'_train'+args.fold+'.csv'
     testfile=args.prefix+'_test'+args.fold+'.csv'
     namep=args.prefix.split('/')[-1]
     if args.cpu:
-        outf_prefix=f'{namep}_cpu_{args.fold}_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}_epochs{args.epochs}_seed{args.seed}'
+        outf_prefix=f'{namep}_cpu_{args.fold}_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}_epochs{args.epochs}_dyn{args.dynamic}_seed{args.seed}'
     else:
-        outf_prefix=f'{namep}_{args.fold}_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}_epochs{args.epochs}_seed{args.seed}'
+        outf_prefix=f'{namep}_{args.fold}_drop{args.dropout}_ldist{args.ldist}_lattn{args.lattn}_Ndense{args.Ndense}_heads{args.heads}_dmodel{args.dmodel}_nsl{args.nstacklayers}_epochs{args.epochs}_dyn{args.dynamic}_seed{args.seed}'
 
 if args.twod:
     outf_prefix.replace('_drop','_2d_drop')
@@ -177,6 +178,9 @@ elif args.optimizer=='adam':
     optimizer=torch.optim.Adam(model.parameters(),lr=args.lr,weight_decay=args.weight_decay)#betas=(args.beta1,args.beta2),eps=args.epsilon,amsgrad=args.amsgrad)#default adam has lr=0.001
 
 losses=[]
+num_epochs_since_improvement=0
+last_test_rmse=999999
+last_test_r2=-1
 
 if not args.skip_train:
     print('Training')
@@ -239,6 +243,37 @@ if not args.skip_train:
         train_rmse, train_r2=(np.sqrt(np.mean((epoch_preds-epoch_gold)**2)), np.corrcoef(epoch_preds,epoch_gold)[0][1]**2)
         if args.wandb:
             wandb.log({"Train Epoch RMSE":train_rmse,"Train Epoch R2":train_r2},step=iteration)
+
+        #If we have set a monitor to early terminate the training we check the test set again.
+        if args.dynamic>0:
+            model.eval()
+            gold=np.array([])
+            preds=np.array([])
+
+            for t_batch in testdata_loader:
+                t_adjacency_matrix, t_node_features, t_distance_matrix, t_y = t_batch
+                gold=np.append(gold,t_y.tolist())
+                t_batch_mask = torch.sum(torch.abs(t_node_features), dim=-1) != 0
+                t_y_pred = model(t_node_features, t_batch_mask, t_adjacency_matrix, t_distance_matrix, None)
+                preds=np.append(preds,t_y_pred.tolist())
+                if not args.cpu:
+                    torch.cuda.empty_cache()
+
+            test_rmse=np.sqrt(np.mean((preds-gold)**2))
+            test_r2=np.corrcoef(preds,gold)[0][1]**2
+            model.train()
+
+            if test_r2 > last_test_r2 or test_rmse < last_test_rmse:
+                last_test_rmse=test_rmse
+                last_test_r2=test_r2
+                num_epochs_since_improvement=0
+            else:
+                num_epochs_since_improvement+=1
+
+            #now we check if the number of epochs is == to args.dynamic
+            if num_epochs_since_improvement==args.dynamic:
+                print(f'Early termination signalled! Stopping training!\n{epoch}/{args.epochs} Completed.')
+                break
 
     #now that the training is complete -- we need to output the training losses
     epoch_mean_losses=[]
