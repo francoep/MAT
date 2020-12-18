@@ -270,6 +270,17 @@ if not args.skip_train:
             else:
                 num_epochs_since_improvement+=1
 
+            #print the resulting stats
+            print(f'----------------------------------')
+            print(f'Epoch: {epoch}/{args.epochs}')
+            print(f'Training RMSE: {train_rmse}')
+            print(f'Training R2: {train_r2}')
+            print(f'Test RMSE: {test_rmse}')
+            print(f'Test R2: {test_r2}')
+            print(f'Num since Improvement: {num_epochs_since_improvement}')
+            print(f'Best RMSE: {last_test_rmse}')
+            print(f'Best R2: {last_test_r2}')
+            print(f'----------------------------------')
             #now we check if the number of epochs is == to args.dynamic
             if num_epochs_since_improvement==args.dynamic:
                 print(f'Early termination signalled! Stopping training!\n{epoch}/{args.epochs} Completed.')
