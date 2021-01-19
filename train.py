@@ -286,14 +286,6 @@ if not args.skip_train:
                 print(f'Early termination signalled! Stopping training!\n{epoch}/{args.epochs} Completed.')
                 break
 
-    #now that the training is complete -- we need to output the training losses
-    epoch_mean_losses=[]
-    for i in range(int(len(losses)/len(data_loader))):
-        tmp=[]
-        for j in range(int(len(data_loader))):
-            tmp.append(losses[int(j+i*len(losses)/len(data_loader))])
-        epoch_mean_losses.append(np.mean(tmp))
-
     print('Training Complete!')
     #saving the trained model
     if args.savemodel:
@@ -307,8 +299,6 @@ if not args.skip_train:
     #saving the training losses
     with open(args.datadir+'/'+outf_prefix+'_trainlosses.pi','wb') as outfile:
         pickle.dump(losses,outfile)
-    with open(args.datadir+'/'+outf_prefix+'_trainepochlosses.pi','wb') as outfile:
-        pickle.dump(epoch_mean_losses,outfile)
 
 #final evaluations
 print('Final Evaluations!')
